@@ -7,10 +7,9 @@ from datetime import datetime
 st.header("1. Rekap Pesanan WA ke Google Sheets")
 
 # Koneksi ke Google Sheets
-scopes = ["https://googleapis.com", "https://googleapis.com"]
-creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scopes)
-client = gspread.authorize(creds)
-sheet = client.open("Rekap_Pesanan_Toko").sheet1
+client = gspread.service_account_from_dict(st.secrets["gcp_service_account"])
+sheet = client.open("Rekap_Pesanan_Toko_Oskaria").sheet1
+
 
 col1, col2 = st.columns(2)
 
