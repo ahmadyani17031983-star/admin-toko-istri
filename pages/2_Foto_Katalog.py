@@ -1,4 +1,4 @@
- import streamlit as st
+import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
 import io
 
@@ -14,13 +14,15 @@ if foto:
         info = st.text_input("Keterangan", "Area Sidrap & Wajo • Free Kartu Ucapan")
     with c2:
         img = Image.open(foto).convert("RGBA")
-        h_new = int(img.size[1] * (1080 / img.size[0]))
+        lebar_asli, tinggi_asli = img.size
+        h_new = int(tinggi_asli * (1080 / lebar_asli))
         img = img.resize((1080, h_new))
         ov = Image.new("RGBA", img.size, (0, 0, 0, 0))
         d = ImageDraw.Draw(ov)
         d.rectangle([(0, h_new - 210), (1080, h_new)], fill=(20, 20, 20, 195))
         d.rectangle([(710, h_new - 175), (1040, h_new - 90)], fill=(220, 53, 69, 255))
-        f_lg, f_md = ImageFont.load_default(size=40), ImageFont.load_default(size=26)
+        f_lg = ImageFont.load_default(size=40)
+        f_md = ImageFont.load_default(size=26)
         d.text((40, h_new - 180), produk, fill=(255, 255, 255, 255), font=f_lg)
         d.text((40, h_new - 120), info, fill=(220, 220, 220, 255), font=f_md)
         d.text((40, h_new - 70), f"WA: 0851-7545-8884 | IG: {toko}", fill=(255, 215, 0, 255), font=f_md)
