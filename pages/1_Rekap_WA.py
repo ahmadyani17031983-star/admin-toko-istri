@@ -6,10 +6,19 @@ from datetime import datetime
 
 st.header("1. Rekap Pesanan WA ke Google Sheets")
 
-# Koneksi ke Google Sheets
-client = gspread.service_account_from_dict(st.secrets["gcp_service_account"])
-sheet = client.open("Rekap_Pesanan_Toko_Oskaria").sheet1
+# Koneksi ke Google Sheets dengan alamat izin yang benar
+scopes = [
+    "https://googleapis.com",
+    "https://googleapis.com"
+]
 
+try:
+    creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scopes)
+    client = gspread.authorize(creds)
+    sheet = client.open("Rekap_Pesanan_Toko").sheet1
+except Exception as e:
+    st.error(f"Belum berhasil terhubung ke Google Sheets. Pesan error: {e}")
+    st.stop()
 
 col1, col2 = st.columns(2)
 
@@ -34,20 +43,22 @@ with col1:
                 k, v = b.split(":", 1)
                 k, v = k.lower(), v.strip()
                 if "pemesan" in k: data["Pemesan"] = v
-                elif "hp" in k or "penerima" in k: data["HP"] = v
+                elif "hp" in k or "penerima" in k: data["HP"] = f"'{v}"
                 elif "alamat" in k: data["Alamat"] = v
                 elif "pesanan" in k: data["Pesanan"] = v
                 elif "ucapan" in k: data["Ucapan"] = v
                 elif "waktu" in k: data["Kirim"] = v
 
-        sheet.append_row(list(data.values()))
+        sheet.append_row(list(data.values()), value_input_option="USER_ENTERED")
         st.success("Berhasil! Pesanan sudah tersimpan di Google Sheets.")
+        st.rerun()
 
 with col2:
     st.subheader("Ringkasan & Daftar Pesanan")
     records = sheet.get_all_records()
     if records:
         df = pd.DataFrame(records)
+        df["Harga"] = pd.to_numeric(df["Harga"], errors="coerce").fillna(0)
         st.metric("Total Omzet Tercatat", f"Rp {df['Harga'].sum():,.0f}")
         st.dataframe(df, use_container_width=True)
     else:
